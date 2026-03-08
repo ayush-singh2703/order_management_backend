@@ -52,4 +52,51 @@ class Bar(models.Model):
     
     def __str__(self):
         return f"{self.name} ({self.category})"
+        
+class Order(models.Model):
+    STATUS_CHOICES = [
+        ("NEW", "New"),
+        ("IN_PROGRESS", "In Progress"),
+        ("COMPLETED", "Completed"),
+        ("CANCELLED", "Cancelled"),
+    ]
+    restaurant = models.ForeignKey(
+        Restaurant,
+        on_delete=models.CASCADE,
+        related_name="orders"
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="NEW")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Order #{self.id} - {self.restaurant.name} ({self.status})"
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name="orders"
+    )
+    food = models.ForeignKey(
+        Food,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="order_items"
+    )
+    bar = models.ForeignKey(
+        Bar,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="order_items"
+    )
+    quantity = models.IntegerField()
+
+    def __str__(self):
+        item = self.food or self.bar
+        return f"{quantity}x {item.name} (Order #{self.order.id})"
+
     
